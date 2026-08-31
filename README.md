@@ -1,231 +1,338 @@
 # AIJobResearcher Frontend
 
-Frontend service for AIJobResearcher - a job search platform with AI-powered recommendations, application management, and learning resources.
+> A modern, enterprise-grade React application for job search with AI-powered recommendations.
 
-## Features
+## 🚀 Tech Stack (August 2026)
 
-✨ **Key Features:**
-- 📋 Browse job listings with advanced filtering and search
-- 🔍 Real-time search with debouncing
-- 🌍 Filter by location, salary, employment type, and more
-- ♾️ Infinite scroll for seamless browsing
-- 📱 Fully responsive design (desktop, tablet, mobile)
-- 🎨 Clean, LinkedIn-inspired UI with light theme
-- ⚡ Built with React 18, TypeScript, and Vite
-- 🏗️ Clean architecture with separation of concerns
+### Core
+- **React 19.2** - Latest React with Server Components support
+- **TypeScript 5.5** - Type-safe development
+- **Webpack 5** - Enterprise-grade bundler with full control
+- **Babel 7** - Modern JavaScript transpilation
 
-## Tech Stack
+### State Management & Data Fetching
+- **TanStack Query v5** - Server state management with caching and synchronization
+- **Zustand v5** - Lightweight client state management
+- **Fetch API** - Native HTTP client (no external dependencies)
 
-- **React** 18.3+ - UI library
-- **TypeScript** 5.x - Type safety
-- **React Router** 6.x - Client-side routing
-- **Axios** - HTTP client with interceptors
-- **Bootstrap** 5.3+ - CSS utilities
-- **Vite** - Build tool and dev server
+### Styling & UI
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **PostCSS** - CSS transformations
+- **Autoprefixer** - Browser compatibility
 
-## Project Structure
+### Forms & Validation
+- **React Hook Form v8** - Performant form handling
+- **Zod v3** - Runtime TypeScript-first schema validation
+
+### Testing
+- **Vitest v1** - Fast unit testing
+- **React Testing Library v16** - Component testing via user behavior
+- **Playwright v1** - End-to-end testing
+- **@testing-library/jest-dom** - DOM matchers
+
+### Code Quality
+- **ESLint v9** - Linting with React and TypeScript plugins
+- **Prettier v3** - Code formatting
+- **Husky v9** - Git hooks
+- **lint-staged v15** - Run linters on staged files
+
+## 📁 Project Structure
 
 ```
 src/
-├── api/                 # API client and endpoints
-│   ├── client.ts       # Axios instance with interceptors
-│   └── vacancies.ts    # Vacancy API functions
-├── components/          # React components
-│   ├── common/         # Reusable components (Spinner, ErrorFallback)
-│   ├── layout/         # Layout components (Header)
-│   └── vacancies/      # Vacancy-specific components
-├── hooks/              # Custom React hooks
-│   ├── useVacancies.ts
-│   ├── useVacancyDetail.ts
+├── api/                    # API client and endpoints
+│   └── client.ts          # Fetch-based HTTP client with interceptors
+├── components/            # React components
+│   ├── common/           # Reusable components (Spinner, ErrorFallback)
+│   ├── layout/           # Layout components (Header)
+│   └── vacancies/        # Feature-specific components
+├── hooks/                 # Custom React hooks
+│   ├── useVacancies.ts   # TanStack Query hooks for vacancies
 │   └── useInfiniteScroll.ts
-├── types/              # TypeScript interfaces
+├── store/                 # Zustand stores
+│   └── vacancyFilterStore.ts
+├── schemas/               # Zod validation schemas
 │   └── vacancy.ts
-├── utils/              # Utility functions
+├── types/                 # TypeScript type definitions
+│   └── vacancy.ts
+├── utils/                 # Utility functions
+│   ├── constants.ts
 │   ├── dateFormatter.ts
-│   ├── salaryFormatter.ts
-│   └── constants.ts
-├── styles/             # Global styles
-├── pages/              # Page components
+│   └── salaryFormatter.ts
+├── styles/                # Global styles
+│   └── index.css
+├── pages/                 # Page components
 │   └── HomePage.tsx
-├── App.tsx             # Main app component
-├── main.tsx            # Entry point
-└── vite-env.d.ts       # Vite type definitions
+├── __tests__/             # Test files
+├── App.tsx                # Main app component
+├── index.tsx              # Entry point
+└── vite-env.d.ts         # Vite types
 ```
 
-## Getting Started
+## ✨ Features
+
+### ✅ Current
+- 📋 **Browse Job Listings** - Browse vacancies with pagination
+- 🔍 **Advanced Filtering** - Filter by title, location, salary, employment type
+- 🔎 **Real-time Search** - Debounced search with 500ms delay
+- ♾️ **Infinite Scroll** - Load more vacancies as you scroll
+- 📱 **Responsive Design** - Two-column on desktop, single column on mobile
+- 💾 **URL Persistence** - Filters saved in URL for bookmarking
+- ⚡ **Optimized Performance** - Code splitting, lazy loading, caching
+- 🎨 **Enterprise UI** - Tailwind CSS with clean, modern design
+- 🧪 **Comprehensive Tests** - Unit, component, and E2E tests
+- 📊 **Type Safety** - Full TypeScript + Zod runtime validation
+- 🛡️ **Error Handling** - Graceful error fallbacks with retry logic
+
+### 🚧 Coming Soon
+- 👤 User applications/responses page
+- 📚 Learning resources
+- 👥 User profile
+- 🔔 Notifications
+- ❤️ Saved vacancies
+- 🤖 AI recommendations
+
+## 🏃 Quick Start
 
 ### Prerequisites
-
-- Node.js 16+ and npm/yarn
-- Git
+- Node.js 18+ (LTS)
+- npm or yarn
 
 ### Installation
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/AIJobResearcher/frontend.git
-   cd frontend
-   ```
+```bash
+# Clone repository
+git clone https://github.com/AIJobResearcher/frontend.git
+cd frontend
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+# Install dependencies
+npm install
 
-3. Create `.env.local` file:
-   ```bash
-   cp .env.example .env.local
-   ```
+# Setup git hooks
+npx husky install
+```
 
-4. Update `.env.local` with your API endpoint:
-   ```
-   REACT_APP_API_URL=http://localhost:3001/api/v1
-   ```
+### Environment Setup
+
+```bash
+# Copy environment template
+cp .env.development .env.local
+
+# Update API URL if needed
+# VITE_API_URL=http://localhost:8001/api/v1
+```
 
 ### Development
 
-Start the development server:
-
 ```bash
+# Start development server (opens on http://localhost:3000)
 npm run dev
-```
 
-The app will open at `http://localhost:3000`.
-
-### Build
-
-Build for production:
-
-```bash
-npm run build
-```
-
-Preview the build locally:
-
-```bash
-npm run preview
-```
-
-### Linting & Formatting
-
-Run ESLint:
-
-```bash
+# Lint code
 npm run lint
+
+# Format code
+npm run format
+
+# Run tests
+npm run test
+
+# Watch mode for tests
+npm run test:watch
+
+# Generate coverage report
+npm run test:coverage
+
+# Type check
+npm run type-check
 ```
 
-Format code with Prettier:
+### Production Build
 
 ```bash
-npm run format
+# Build for production
+npm run build
+
+# Analyze bundle size
+npm run build:analyze
+
+# Preview production build
+cd dist && python -m http.server
 ```
 
-## Features Documentation
+## 🧪 Testing
 
-### 1. Vacancy List with Filters
+### Unit & Component Tests
 
-**Filters:**
-- Search by title or keyword
-- Filter by country and city
-- Salary range (min/max)
-- Status (open/closed)
-- Sort options (latest, salary ascending/descending)
+```bash
+# Run all tests
+npm run test
 
-All filters are synced to the URL for bookmarkability and sharing.
+# Watch mode
+npm run test:watch
 
-### 2. Infinite Scroll
+# Coverage report
+npm run test:coverage
+```
 
-The vacancy list automatically loads more items when you scroll to the bottom. Uses the native Intersection Observer API for optimal performance.
+### Test Files Location
+```
+src/__tests__/
+├── components/
+│   └── layout/
+│       └── Header.test.tsx
+├── hooks/
+│   └── useVacancies.test.tsx
+├── store/
+│   └── vacancyFilterStore.test.ts
+└── schemas/
+    └── vacancy.test.ts
+```
 
-### 3. Vacancy Details
+### E2E Tests (Coming Soon)
+```bash
+npm run test:e2e
+```
 
-Click any vacancy to view full details:
-- Company information with description
-- Contact details (website, phone, email)
-- Job description and requirements
-- Employment type and workplace type
-- Salary range
-- Apply button (feature coming soon)
-
-### 4. Responsive Design
-
-- **Desktop (≥ 992px):** Two-column layout (list + details)
-- **Tablet (768-991px):** Two columns with adjusted sizing
-- **Mobile (< 768px):** Single column with details below
-
-### 5. Error Handling
-
-Graceful error handling with retry buttons for:
-- Failed vacancy list loads
-- Failed vacancy detail loads
-- Network errors
-
-## API Integration
+## 📦 API Integration
 
 ### Base URL
-
 ```
-http://localhost:3001/api/v1
+http://localhost:8001/api/v1
 ```
 
-### Endpoints Used
+### Endpoints
 
 **GET /vacancies**
-- List vacancies with pagination and filtering
+- List vacancies with filtering and pagination
 - Query params: `title`, `country`, `city`, `salary_min`, `salary_max`, `status`, `sort`, `page`, `per_page`
+- Response: `{ data: VacancyPreview[], total: number, page: number, per_page: number }`
 
 **GET /vacancies/:id**
 - Get detailed vacancy information
+- Response: `VacancyDetail`
 
-## Contributing
+**POST /vacancies/:id/apply**
+- Apply to vacancy (coming soon)
+- Response: `{ success: boolean, message: string }`
 
-1. Create a feature branch: `git checkout -b feature/your-feature`
-2. Commit changes: `git commit -m 'Add your feature'`
-3. Push to branch: `git push origin feature/your-feature`
-4. Open a Pull Request
+## 🎯 Architecture Decisions
 
-## Code Standards
+### Why Webpack over Vite?
+- **Enterprise Standard** - More control and customization
+- **Plugin Ecosystem** - Mature and extensive
+- **Production Proven** - Used by Meta, Netflix, Airbnb
+- **Monorepo Support** - Better for scaling
 
-- **TypeScript:** No `any` types (except in rare cases with comments)
-- **React:** Functional components with hooks
-- **Naming:** camelCase for variables/functions, PascalCase for components
-- **Comments:** Use for complex logic and hooks
-- **Imports:** Organized with `@/` path aliases
+### Why TanStack Query?
+- **Server State** - Automatic caching and synchronization
+- **Refetching** - Background updates and retry logic
+- **DevTools** - Great debugging experience
+- **Performance** - Reduces component re-renders
 
-## Future Features
+### Why Zustand?
+- **Lightweight** - Minimal boilerplate vs Redux
+- **TypeScript First** - Great type inference
+- **Simple API** - Easier to learn and maintain
+- **Perfect for UI State** - Filters, modals, etc.
 
-- ✅ Vacancy listing (current)
-- 📱 User applications/responses page
-- 🎓 Learning resources page
-- 👤 User profile page
-- 🔔 Notifications
-- 💾 Saved vacancies
-- 🤖 AI recommendations
+### Why Tailwind CSS?
+- **Modern Standard** - Now industry default
+- **Performance** - Minimal CSS bundle
+- **Customizable** - Easy to extend theme
+- **Developer Experience** - Faster development
 
-## Environment Variables
+## 🔐 Code Quality Standards
 
-| Variable | Description | Default |
-| --- | --- | --- |
-| `REACT_APP_API_URL` | Backend API base URL | `http://localhost:3001/api/v1` |
+### Pre-commit Hooks (Husky + lint-staged)
+- ESLint checks on staged TypeScript files
+- Prettier formatting on all source files
+- Automatic fixes for common issues
 
-## Performance Considerations
+### Pre-push Hooks
+- Full type checking
+- Ensures no type errors reach remote
 
-- React.memo used for vacancy cards in large lists
-- Debounced search input (500ms)
-- Intersection Observer for infinite scroll (no scroll event listeners)
-- Optimized bundle with Vite
+### ESLint Rules
+- React best practices
+- React Hooks rules
+- TypeScript strict mode
+- No console.log in production
+- Exhaustive deps checks
 
-## Browser Support
+## 🚀 Performance Optimization
+
+- **Code Splitting** - Automatic chunk splitting by Webpack
+- **Lazy Loading** - React Router dynamic imports
+- **Infinite Scroll** - Intersection Observer (no scroll listeners)
+- **Debounced Search** - 500ms delay reduces API calls
+- **Query Caching** - TanStack Query caches responses
+- **CSS Optimization** - Tailwind CSS purging
+- **Image Optimization** - Asset handling in webpack
+
+## 🌍 Browser Support
 
 - Chrome/Chromium (latest)
 - Firefox (latest)
 - Safari (latest)
 - Edge (latest)
+- Modern browsers with ES2020 support
 
-## License
+## 📊 Bundle Analysis
+
+```bash
+npm run build:analyze
+```
+
+Generated stats can be analyzed with webpack-bundle-analyzer.
+
+## 🤝 Contributing
+
+1. Create feature branch: `git checkout -b feature/your-feature`
+2. Code changes follow ESLint rules
+3. Add tests for new functionality
+4. Commit follows conventions (pre-commit hooks run)
+5. Push triggers type-check (pre-push hooks run)
+6. Open Pull Request with clear description
+
+## 📝 Naming Conventions
+
+- **Files**: camelCase for utilities, PascalCase for components
+- **Functions**: camelCase
+- **Components**: PascalCase
+- **Constants**: UPPER_SNAKE_CASE
+- **Types**: PascalCase with `Type` suffix (e.g., `VacancyType`)
+- **Interfaces**: PascalCase with `I` prefix (optional, e.g., `IVacancy`)
+
+## 🔍 Type Safety
+
+- **Strict Mode**: Enabled in TypeScript
+- **Runtime Validation**: Zod schemas for API responses
+- **No `any`**: Use `unknown` if needed, always narrow type
+- **Explicit Types**: Always add return types to functions
+
+## 📚 Additional Resources
+
+- [React 19 Documentation](https://react.dev)
+- [TanStack Query Docs](https://tanstack.com/query)
+- [Zustand GitHub](https://github.com/pmndrs/zustand)
+- [Tailwind CSS Docs](https://tailwindcss.com)
+- [Webpack Docs](https://webpack.js.org)
+- [Vitest Docs](https://vitest.dev)
+
+## 📄 License
 
 See LICENSE file for details.
 
-## Support
+## 🆘 Support
 
-For issues and questions, please open an issue on GitHub.
+For issues and questions:
+1. Check GitHub Issues
+2. Review documentation
+3. Create new issue with detailed description
+4. Include error logs and reproduction steps
+
+---
+
+**Made with ❤️ by AIJobResearcher Team**  
+**Last Updated: August 2026**
