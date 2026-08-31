@@ -12,19 +12,16 @@ const defaultFilters: Partial<FilterParams> = {
   sort: 'date',
 };
 
-/**
- * Zustand store for vacancy filters
- */
 export const useVacancyFilterStore = create<VacancyFilterStore>((set) => ({
   filters: defaultFilters,
-  setFilters: (filters) =>
+  setFilters: (filters): void =>
     set({
       filters: {
         ...defaultFilters,
         ...filters,
       },
     }),
-  resetFilters: () =>
+  resetFilters: (): void =>
     set({
       filters: defaultFilters,
     }),

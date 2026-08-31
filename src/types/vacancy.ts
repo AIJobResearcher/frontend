@@ -1,7 +1,3 @@
-/**
- * Type definitions for vacancy data structures
- */
-
 export interface Employer {
   id: string;
   name: string;
@@ -21,6 +17,13 @@ export interface VacancyPreview {
   location: string;
   published_at: string;
   status: 'open' | 'closed';
+  // дополнительные поля для UI (могут отсутствовать в API)
+  company_logo?: string;
+  company?: string;
+  city?: string;
+  country?: string;
+  employment_type?: string;
+  workplace_type?: string;
 }
 
 export interface Vacancy {
@@ -39,7 +42,15 @@ export interface Vacancy {
   posted_at: string;
   status: 'open' | 'closed';
   version: number;
+  // дополнительные поля для UI
+  company_logo?: string;
+  company_description?: string;
+  company_website?: string;
+  company_email?: string;
+  company_phone?: string;
 }
+
+export type VacancyDetail = Vacancy;
 
 export interface VacanciesListResponse {
   data: VacancyPreview[];

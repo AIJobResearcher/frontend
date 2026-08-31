@@ -1,11 +1,13 @@
 import { apiClient } from './client';
-import { VacanciesListResponse, VacancyDetailResponse, FilterParams } from '@/types/vacancy';
+import {
+  VacanciesListResponse,
+  VacancyDetailResponse,
+  FilterParams,
+  Vacancy,
+} from '@/types/vacancy';
 
-/**
- * Fetch list of vacancies with pagination and filtering
- */
 export const getVacancies = async (params: FilterParams): Promise<VacanciesListResponse> => {
-  const queryParams: Record<string, any> = {
+  const queryParams: Record<string, string | number | undefined> = {
     page: params.page,
     per_page: params.per_page,
   };
@@ -26,13 +28,7 @@ export const getVacancies = async (params: FilterParams): Promise<VacanciesListR
   return response.data;
 };
 
-/**
- * Fetch detailed information about a specific vacancy
- */
 export const getVacancyById = async (id: string): Promise<Vacancy> => {
   const response = await apiClient.get<VacancyDetailResponse>(`/vacancies/${id}`);
   return response.data.data;
 };
-
-// Re-export Vacancy type for convenience
-export { Vacancy } from '@/types/vacancy';

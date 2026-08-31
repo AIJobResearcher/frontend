@@ -5,16 +5,12 @@ import { useVacancies, useVacancyDetail } from '@/hooks';
 import { useVacancyFilterStore } from '@/store/vacancyFilterStore';
 import { FilterParams } from '@/types/vacancy';
 
-/**
- * Home page component - main page with vacancy list and detail view
- */
 export const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { id: vacancyIdFromUrl } = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const { filters, setFilters: setStoreFilters } = useVacancyFilterStore();
+  const { setFilters: setStoreFilters } = useVacancyFilterStore();
 
-  // Parse filters from URL
   const initialFilters: Partial<FilterParams> = {
     title: searchParams.get('title') || undefined,
     country: searchParams.get('country') || undefined,
@@ -25,11 +21,10 @@ export const HomePage: React.FC = () => {
     salary_max: searchParams.get('salary_max')
       ? parseInt(searchParams.get('salary_max')!, 10)
       : undefined,
-    status: (searchParams.get('status') as 'open' | 'closed') || 'open',
-    sort: (searchParams.get('sort') as any) || 'date',
+    status: (searchParams.get('status') as FilterParams['status']) || 'open',
+    sort: (searchParams.get('sort') as FilterParams['sort']) || 'date',
   };
 
-  // TanStack Query hook
   const {
     vacancies,
     isLoading,
@@ -42,21 +37,24 @@ export const HomePage: React.FC = () => {
     retry,
   } = useVacancies(initialFilters);
 
-  // Vacancy detail hook
-  const { vacancy, isLoading: detailLoading, error: detailError, refetch: refetchDetail } =
-    useVacancyDetail(vacancyIdFromUrl);
+  const {
+    vacancy,
+    isLoading: detailLoading,
+    error: detailError,
+    refetch: refetchDetail,
+  } = useVacancyDetail(vacancyIdFromUrl);
 
-  // Handle filter changes
   const handleFilterChange = React.useCallback(
     (newFilters: Partial<FilterParams>) => {
-      // Update URL
       const params = new URLSearchParams();
 
       if (newFilters.title) params.set('title', newFilters.title);
       if (newFilters.country) params.set('country', newFilters.country);
       if (newFilters.city) params.set('city', newFilters.city);
-      if (newFilters.salary_min !== undefined) params.set('salary_min', String(newFilters.salary_min));
-      if (newFilters.salary_max !== undefined) params.set('salary_max', String(newFilters.salary_max));
+      if (newFilters.salary_min !== undefined)
+        params.set('salary_min', String(newFilters.salary_min));
+      if (newFilters.salary_max !== undefined)
+        params.set('salary_max', String(newFilters.salary_max));
       if (newFilters.status) params.set('status', newFilters.status);
       if (newFilters.sort) params.set('sort', newFilters.sort);
 
@@ -67,7 +65,6 @@ export const HomePage: React.FC = () => {
     [setSearchParams, setFilters, setStoreFilters]
   );
 
-  // Handle vacancy selection
   const handleSelectVacancy = React.useCallback(
     (id: string) => {
       navigate(`/vacancy/${id}`);
@@ -75,7 +72,6 @@ export const HomePage: React.FC = () => {
     [navigate]
   );
 
-  // Handle apply button
   const handleApply = React.useCallback(() => {
     alert('This feature will be available in the next version!');
   }, []);
@@ -83,16 +79,13 @@ export const HomePage: React.FC = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="container-fluid py-8">
-        {/* Filters */}
         <VacancyFilters
           onFilterChange={handleFilterChange}
           currentFilters={initialFilters}
           isLoading={isLoading}
         />
 
-        {/* Main content - two column layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left column - List */}
           <div className="lg:col-span-7">
             <div className="flex flex-col">
               <h2 className="text-2xl font-semibold text-gray-900 mb-6">
@@ -112,7 +105,6 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right column - Detail (hidden on mobile) */}
           <div className="hidden lg:block lg:col-span-5">
             <div className="flex flex-col">
               <VacancyDetail

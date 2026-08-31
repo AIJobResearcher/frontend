@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface UseInfiniteScrollOptions {
   onIntersect: () => void;
@@ -6,31 +6,25 @@ interface UseInfiniteScrollOptions {
   threshold?: number | number[];
 }
 
-/**
- * Hook to handle infinite scroll using IntersectionObserver API
- * Returns a ref to attach to the trigger element (usually at the bottom of a list)
- */
 export const useInfiniteScroll = ({
-  onIntersect,
-  enabled = true,
-  threshold = 0.1,
-}: UseInfiniteScrollOptions) => {
+                                    onIntersect,
+                                    enabled = true,
+                                    threshold = 0.1,
+                                  }: UseInfiniteScrollOptions): React.RefObject<HTMLDivElement | null> => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!enabled || !ref.current) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            onIntersect();
-          }
-        });
-      },
-      {
-        threshold,
-      }
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              onIntersect();
+            }
+          });
+        },
+        { threshold }
     );
 
     observer.observe(ref.current);
