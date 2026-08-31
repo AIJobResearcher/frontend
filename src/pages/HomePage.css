@@ -1,0 +1,23 @@
+.home-page {
+  padding: 2rem 0;
+  min-height: calc(100vh - 120px);
+  background-color: #f8f9fa;
+}
+
+.vacancy-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.vacancy-section__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .home-page {
+    padding: 1rem 0;
+  }
+}

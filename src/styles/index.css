@@ -1,0 +1,95 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f9fa;
+  color: #1a1a1a;
+}
+
+a {
+  color: #0056b3;
+  text-decoration: none;
+  transition: color 0.15s ease-in-out;
+
+  &:hover {
+    color: #003d82;
+  }
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Bootstrap utility classes */
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background-color: #0056b3;
+  color: #ffffff;
+  border-color: #0056b3;
+
+  &:hover:not(:disabled) {
+    background-color: #003d82;
+    border-color: #003d82;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25);
+  }
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+
+  &:hover {
+    background: #555;
+  }
+}
