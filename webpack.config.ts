@@ -2,6 +2,8 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import webpack from 'webpack';
+import TerserPlugin from 'terser-webpack-plugin';
+import CssMinimizerPlugin from 'css-minimizer-webpack-plugin';
 import type { Configuration as WebpackConfiguration } from 'webpack';
 import type { Configuration as DevServerConfiguration } from 'webpack-dev-server';
 
@@ -15,7 +17,7 @@ const isProduction = !isDevelopment;
 const config: Configuration = {
   mode: isDevelopment ? 'development' : 'production',
   devtool: isDevelopment ? 'source-map' : 'source-map',
-  entry: './src/index.tsx',
+  entry: './src/main.tsx',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: isDevelopment ? '[name].js' : '[name].[contenthash:8].js',
@@ -63,10 +65,7 @@ const config: Configuration = {
               postcssOptions: {
                 plugins: [
                   [
-                    'tailwindcss',
-                    {
-                      config: path.resolve(__dirname, 'tailwind.config.js'),
-                    },
+                    '@tailwindcss/postcss',
                   ],
                   'autoprefixer',
                 ],
@@ -109,9 +108,7 @@ const config: Configuration = {
     }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
-      'process.env.VITE_API_URL': JSON.stringify(
-        process.env.VITE_API_URL || 'http://localhost:8001/api/v1'
-      ),
+      'API_BASE_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:3001/api/v1'),
     }),
     isProduction &&
       new MiniCssExtractPlugin({
@@ -122,36 +119,29 @@ const config: Configuration = {
   optimization: {
     minimize: isProduction,
     minimizer: isProduction
-      ? [
-          new (require('terser-webpack-plugin'))({
+        ? [
+          new TerserPlugin({
             terserOptions: {
-              parse: {
-                ecma: 2020,
-              },
-              compress: {
-                ecma: 2020,
-              },
-              output: {
-                ecma: 2020,
-                comments: false,
-              },
+              parse: { ecma: 2020 },
+              compress: { ecma: 2020 },
+              output: { ecma: 2020, comments: false },
             },
             extractComments: false,
           }),
-          new (require('css-minimizer-webpack-plugin'))(),
+          new CssMinimizerPlugin(),
         ]
-      : [],
+        : [],
     splitChunks: {
       chunks: 'all',
       cacheGroups: {
         vendors: {
-          test: /[\\\/]node_modules[\\\/]/,
+          test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
           priority: 10,
           reuseExistingChunk: true,
         },
         react: {
-          test: /[\\\/]node_modules[\\\/](react|react-dom|react-router-dom)[\\\/]/,
+          test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
           name: 'react-vendors',
           priority: 20,
           reuseExistingChunk: true,
@@ -180,13 +170,14 @@ const config: Configuration = {
         warnings: false,
       },
     },
-    proxy: {
-      '/api': {
+    proxy: [
+      {
+        context: ['/api'],
         target: process.env.VITE_API_URL || 'http://localhost:8001',
         pathRewrite: { '^/api': '' },
         changeOrigin: true,
       },
-    },
+    ],
   },
   performance: {
     hints: isProduction ? 'warning' : false,

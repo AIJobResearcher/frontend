@@ -1,19 +1,25 @@
 import React from 'react';
 import { useMutation, useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import { FilterParams, VacancyPreview, VacancyDetail as VacancyDetailType } from '@/types/vacancy';
+import { FilterParams, VacancyPreview, Vacancy } from '@/types/vacancy';
 import { apiClient } from '@/api/client';
 
-const VACANCIES_KEY = ['vacancies'] as const;
-const VACANCY_KEY = ['vacancy'] as const;
+interface UseVacanciesReturn {
+  vacancies: VacancyPreview[];
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  error: string | null;
+  hasMore: boolean;
+  totalVacancies: number;
+  setFilters: React.Dispatch<React.SetStateAction<Partial<FilterParams>>>;
+  fetchMoreVacancies: () => void;
+  retry: () => void;
+}
 
-/**
- * Hook for fetching vacancies list with pagination and filtering
- */
-export const useVacancies = (filters?: Partial<FilterParams>) => {
+export const useVacancies = (filters?: Partial<FilterParams>): UseVacanciesReturn => {
   const [currentFilters, setCurrentFilters] = React.useState<Partial<FilterParams>>(filters || {});
 
   const { data, isLoading, isFetching, error, hasNextPage, fetchNextPage } = useInfiniteQuery({
-    queryKey: [VACANCIES_KEY, currentFilters],
+    queryKey: ['vacancies', currentFilters],
     queryFn: async ({ pageParam = 1 }) => {
       const response = await apiClient.get<{
         data: VacancyPreview[];
@@ -27,7 +33,7 @@ export const useVacancies = (filters?: Partial<FilterParams>) => {
           per_page: 20,
         },
       });
-      return response;
+      return response.data;
     },
     getNextPageParam: (lastPage) => {
       const { page, per_page, total } = lastPage;
@@ -57,15 +63,20 @@ export const useVacancies = (filters?: Partial<FilterParams>) => {
   };
 };
 
-/**
- * Hook for fetching single vacancy details
- */
-export const useVacancyDetail = (id?: string) => {
+interface UseVacancyDetailReturn {
+  vacancy: Vacancy | null;
+  isLoading: boolean;
+  error: string | null;
+  refetch: () => void;
+}
+
+export const useVacancyDetail = (id?: string): UseVacancyDetailReturn => {
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: [VACANCY_KEY, id],
+    queryKey: ['vacancy', id],
     queryFn: async () => {
       if (!id) return null;
-      return await apiClient.get<VacancyDetailType>(`/vacancies/${id}`);
+      const response = await apiClient.get<{ data: Vacancy }>(`/vacancies/${id}`);
+      return response.data.data;
     },
     enabled: !!id,
   });
@@ -78,10 +89,12 @@ export const useVacancyDetail = (id?: string) => {
   };
 };
 
-/**
- * Hook for applying to a vacancy
- */
-export const useApplyVacancy = () => {
+interface UseApplyVacancyReturn {
+  apply: (vacancyId: string) => void;
+  isApplying: boolean;
+}
+
+export const useApplyVacancy = (): UseApplyVacancyReturn => {
   const { mutate, isPending } = useMutation({
     mutationFn: async (vacancyId: string) => {
       return await apiClient.post(`/vacancies/${vacancyId}/apply`, {});

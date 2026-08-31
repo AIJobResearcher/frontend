@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FilterParams } from '@/types/vacancy';
 import { SORT_OPTIONS } from '@/utils/constants';
 
@@ -8,9 +8,6 @@ interface VacancyFiltersProps {
   isLoading?: boolean;
 }
 
-/**
- * Filter panel component for vacancies
- */
 export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
   onFilterChange,
   currentFilters,
@@ -73,7 +70,7 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
 
   const handleSortChange = useCallback(
     (value: string) => {
-      onFilterChange({ sort: value as any });
+      onFilterChange({ sort: value as FilterParams['sort'] });
     },
     [onFilterChange]
   );

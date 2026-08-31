@@ -19,8 +19,4 @@ export const EMPLOYMENT_TYPES = [
   'Temporary',
 ];
 
-export const WORKPLACE_TYPES = [
-  'On-site',
-  'Remote',
-  'Hybrid',
-];
+export const WORKPLACE_TYPES = ['On-site', 'Remote', 'Hybrid'];

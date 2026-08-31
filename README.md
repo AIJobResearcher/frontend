@@ -108,8 +108,8 @@ cd frontend
 # Install dependencies
 npm install
 
-# Setup git hooks
-npx husky install
+# Setup git hooks (if needed manually)
+npm run prepare
 ```
 
 ### Environment Setup

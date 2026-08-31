@@ -28,6 +28,13 @@
       "@/*": ["src/*"]
     }
   },
+  "ts-node": {
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es2020",
+      "esModuleInterop": true
+    }
+  },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

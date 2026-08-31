@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FilterParamsSchema, VacancyPreviewSchema, VacancyDetailSchema } from '@/schemas/vacancy';
+import { FilterParamsSchema, VacancyPreviewSchema } from '@/schemas/vacancy';
 
 describe('Vacancy Schemas', () => {
   describe('FilterParamsSchema', () => {
