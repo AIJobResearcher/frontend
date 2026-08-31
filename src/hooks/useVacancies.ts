@@ -1,104 +1,95 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getVacancies } from '@/api/vacancies';
-import { VacancyPreview, FilterParams } from '@/types/vacancy';
+import React from 'react';
+import { useMutation, useQuery, useInfiniteQuery } from '@tanstack/react-query';
+import { FilterParams, VacancyPreview, VacancyDetail as VacancyDetailType } from '@/types/vacancy';
+import { apiClient } from '@/api/client';
 
-interface UseVacanciesResult {
-  vacancies: VacancyPreview[];
-  isLoading: boolean;
-  isLoadingMore: boolean;
-  error: string | null;
-  hasMore: boolean;
-  currentPage: number;
-  totalVacancies: number;
-  fetchVacancies: (filters: Partial<FilterParams>) => Promise<void>;
-  fetchMoreVacancies: () => Promise<void>;
-  retry: () => Promise<void>;
-}
+const VACANCIES_KEY = ['vacancies'] as const;
+const VACANCY_KEY = ['vacancy'] as const;
 
 /**
- * Hook to manage vacancies list, pagination, and filtering
+ * Hook for fetching vacancies list with pagination and filtering
  */
-export const useVacancies = (initialFilters: Partial<FilterParams>): UseVacanciesResult => {
-  const [vacancies, setVacancies] = useState<VacancyPreview[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalVacancies, setTotalVacancies] = useState(0);
-  const [lastPage, setLastPage] = useState(1);
-  const [filters, setFilters] = useState<FilterParams>({
-    page: 1,
-    per_page: 20,
-    status: 'open',
-    ...initialFilters,
+export const useVacancies = (filters?: Partial<FilterParams>) => {
+  const [currentFilters, setCurrentFilters] = React.useState<Partial<FilterParams>>(filters || {});
+
+  const { data, isLoading, isFetching, error, hasNextPage, fetchNextPage } = useInfiniteQuery({
+    queryKey: [VACANCIES_KEY, currentFilters],
+    queryFn: async ({ pageParam = 1 }) => {
+      const response = await apiClient.get<{
+        data: VacancyPreview[];
+        total: number;
+        page: number;
+        per_page: number;
+      }>('/vacancies', {
+        params: {
+          ...currentFilters,
+          page: pageParam,
+          per_page: 20,
+        },
+      });
+      return response;
+    },
+    getNextPageParam: (lastPage) => {
+      const { page, per_page, total } = lastPage;
+      const nextPage = page + 1;
+      const totalPages = Math.ceil(total / per_page);
+      return nextPage <= totalPages ? nextPage : undefined;
+    },
+    initialPageParam: 1,
   });
 
-  const hasMore = currentPage < lastPage;
+  const vacancies = React.useMemo(() => {
+    return data?.pages.flatMap((page) => page.data) || [];
+  }, [data]);
 
-  const fetchVacancies = useCallback(
-    async (newFilters: Partial<FilterParams> = {}) => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const updatedFilters: FilterParams = {
-          ...filters,
-          ...newFilters,
-          page: 1,
-          per_page: 20,
-        };
-        setFilters(updatedFilters);
-        setCurrentPage(1);
-
-        const response = await getVacancies(updatedFilters);
-        setVacancies(response.data);
-        setTotalVacancies(response.meta.total);
-        setLastPage(response.meta.last_page);
-      } catch (err) {
-        console.error('Failed to fetch vacancies:', err);
-        setError('Failed to load vacancies. Please try again.');
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [filters]
-  );
-
-  const fetchMoreVacancies = useCallback(async () => {
-    if (!hasMore || isLoadingMore) return;
-
-    setIsLoadingMore(true);
-    setError(null);
-    try {
-      const nextPage = currentPage + 1;
-      const response = await getVacancies({
-        ...filters,
-        page: nextPage,
-      });
-      setVacancies((prev) => [...prev, ...response.data]);
-      setCurrentPage(nextPage);
-      setLastPage(response.meta.last_page);
-    } catch (err) {
-      console.error('Failed to fetch more vacancies:', err);
-      setError('Failed to load more vacancies.');
-    } finally {
-      setIsLoadingMore(false);
-    }
-  }, [currentPage, filters, hasMore, isLoadingMore]);
-
-  const retry = useCallback(async () => {
-    await fetchVacancies(filters);
-  }, [filters, fetchVacancies]);
+  const totalVacancies = data?.pages[0]?.total || 0;
 
   return {
     vacancies,
     isLoading,
-    isLoadingMore,
-    error,
-    hasMore,
-    currentPage,
+    isLoadingMore: isFetching && !isLoading,
+    error: error?.message || null,
+    hasMore: !!hasNextPage,
     totalVacancies,
-    fetchVacancies,
-    fetchMoreVacancies,
-    retry,
+    setFilters: setCurrentFilters,
+    fetchMoreVacancies: () => fetchNextPage(),
+    retry: () => fetchNextPage(),
+  };
+};
+
+/**
+ * Hook for fetching single vacancy details
+ */
+export const useVacancyDetail = (id?: string) => {
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: [VACANCY_KEY, id],
+    queryFn: async () => {
+      if (!id) return null;
+      return await apiClient.get<VacancyDetailType>(`/vacancies/${id}`);
+    },
+    enabled: !!id,
+  });
+
+  return {
+    vacancy: data || null,
+    isLoading,
+    error: error?.message || null,
+    refetch,
+  };
+};
+
+/**
+ * Hook for applying to a vacancy
+ */
+export const useApplyVacancy = () => {
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (vacancyId: string) => {
+      return await apiClient.post(`/vacancies/${vacancyId}/apply`, {});
+    },
+  });
+
+  return {
+    apply: mutate,
+    isApplying: isPending,
   };
 };

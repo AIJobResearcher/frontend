@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { VacancyFilters, VacancyList, VacancyDetail } from '@/components/vacancies';
 import { useVacancies, useVacancyDetail } from '@/hooks';
+import { useVacancyFilterStore } from '@/store/vacancyFilterStore';
 import { FilterParams } from '@/types/vacancy';
-import './HomePage.css';
 
 /**
  * Home page component - main page with vacancy list and detail view
@@ -12,6 +12,7 @@ export const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { id: vacancyIdFromUrl } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const { filters, setFilters: setStoreFilters } = useVacancyFilterStore();
 
   // Parse filters from URL
   const initialFilters: Partial<FilterParams> = {
@@ -28,7 +29,7 @@ export const HomePage: React.FC = () => {
     sort: (searchParams.get('sort') as any) || 'date',
   };
 
-  // Vacancies list hook
+  // TanStack Query hook
   const {
     vacancies,
     isLoading,
@@ -36,30 +37,17 @@ export const HomePage: React.FC = () => {
     error,
     hasMore,
     totalVacancies,
-    fetchVacancies,
+    setFilters,
     fetchMoreVacancies,
     retry,
   } = useVacancies(initialFilters);
 
   // Vacancy detail hook
-  const { vacancy, isLoading: detailLoading, error: detailError, fetchVacancy, retry: retryDetail, clear } = useVacancyDetail();
-
-  // Initialize on mount
-  useEffect(() => {
-    fetchVacancies(initialFilters);
-  }, []);
-
-  // Load selected vacancy from URL
-  useEffect(() => {
-    if (vacancyIdFromUrl) {
-      fetchVacancy(vacancyIdFromUrl);
-    } else {
-      clear();
-    }
-  }, [vacancyIdFromUrl, fetchVacancy, clear]);
+  const { vacancy, isLoading: detailLoading, error: detailError, refetch: refetchDetail } =
+    useVacancyDetail(vacancyIdFromUrl);
 
   // Handle filter changes
-  const handleFilterChange = useCallback(
+  const handleFilterChange = React.useCallback(
     (newFilters: Partial<FilterParams>) => {
       // Update URL
       const params = new URLSearchParams();
@@ -73,15 +61,14 @@ export const HomePage: React.FC = () => {
       if (newFilters.sort) params.set('sort', newFilters.sort);
 
       setSearchParams(params);
-
-      // Fetch new data
-      fetchVacancies(newFilters);
+      setFilters(newFilters);
+      setStoreFilters(newFilters);
     },
-    [fetchVacancies, setSearchParams]
+    [setSearchParams, setFilters, setStoreFilters]
   );
 
   // Handle vacancy selection
-  const handleSelectVacancy = useCallback(
+  const handleSelectVacancy = React.useCallback(
     (id: string) => {
       navigate(`/vacancy/${id}`);
     },
@@ -89,13 +76,13 @@ export const HomePage: React.FC = () => {
   );
 
   // Handle apply button
-  const handleApply = useCallback(() => {
+  const handleApply = React.useCallback(() => {
     alert('This feature will be available in the next version!');
   }, []);
 
   return (
-    <div className="home-page">
-      <div className="container-fluid">
+    <div className="bg-gray-50 min-h-screen">
+      <div className="container-fluid py-8">
         {/* Filters */}
         <VacancyFilters
           onFilterChange={handleFilterChange}
@@ -104,11 +91,11 @@ export const HomePage: React.FC = () => {
         />
 
         {/* Main content - two column layout */}
-        <div className="row">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left column - List */}
-          <div className="col-lg-7">
-            <div className="vacancy-section">
-              <h2 className="vacancy-section__title">
+          <div className="lg:col-span-7">
+            <div className="flex flex-col">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-6">
                 Vacancies ({totalVacancies})
               </h2>
               <VacancyList
@@ -126,13 +113,13 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Right column - Detail (hidden on mobile) */}
-          <div className="col-lg-5 d-none d-lg-block">
-            <div className="vacancy-section">
+          <div className="hidden lg:block lg:col-span-5">
+            <div className="flex flex-col">
               <VacancyDetail
                 vacancy={vacancy}
                 isLoading={detailLoading}
                 error={detailError}
-                onRetry={retryDetail}
+                onRetry={refetchDetail}
                 onApply={handleApply}
               />
             </div>

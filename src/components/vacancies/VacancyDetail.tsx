@@ -1,21 +1,17 @@
-import React, { useMemo } from 'react';
-import { Vacancy } from '@/types/vacancy';
-import { formatSalary } from '@/utils/salaryFormatter';
-import { formatDate } from '@/utils/dateFormatter';
-import { EMPLOYMENT_TYPES, WORKPLACE_TYPES } from '@/utils/constants';
+import React from 'react';
+import { VacancyDetail as VacancyDetailType } from '@/types/vacancy';
 import { Spinner, ErrorFallback } from '@/components/common';
-import './VacancyDetail.css';
 
 interface VacancyDetailProps {
-  vacancy: Vacancy | null;
+  vacancy: VacancyDetailType | null;
   isLoading: boolean;
   error: string | null;
-  onRetry?: () => void;
-  onApply?: () => void;
+  onRetry: () => void;
+  onApply: () => void;
 }
 
 /**
- * Detail view component for a selected vacancy
+ * Vacancy detail component
  */
 export const VacancyDetail: React.FC<VacancyDetailProps> = ({
   vacancy,
@@ -26,7 +22,7 @@ export const VacancyDetail: React.FC<VacancyDetailProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="vacancy-detail">
+      <div className="bg-white rounded-lg p-6">
         <Spinner size="md" label="Loading vacancy details..." />
       </div>
     );
@@ -34,7 +30,7 @@ export const VacancyDetail: React.FC<VacancyDetailProps> = ({
 
   if (error) {
     return (
-      <div className="vacancy-detail">
+      <div className="bg-white rounded-lg p-6">
         <ErrorFallback message={error} onRetry={onRetry} />
       </div>
     );
@@ -42,108 +38,105 @@ export const VacancyDetail: React.FC<VacancyDetailProps> = ({
 
   if (!vacancy) {
     return (
-      <div className="vacancy-detail-empty">
+      <div className="bg-white rounded-lg p-6 text-center text-gray-500">
         <p>Select a vacancy to view details</p>
       </div>
     );
   }
 
+  const salary = vacancy.salary_min && vacancy.salary_max ? `$${vacancy.salary_min}K - $${vacancy.salary_max}K` : 'Not specified';
+
   return (
-    <div className="vacancy-detail">
-      <div className="vacancy-detail__header">
-        <h2 className="vacancy-detail__title">{vacancy.title}</h2>
-        <p className="vacancy-detail__posted">{formatDate(vacancy.posted_at)}</p>
-      </div>
+    <div className="bg-white rounded-lg overflow-hidden shadow-sm">
+      {vacancy.company_logo && (
+        <img
+          src={vacancy.company_logo}
+          alt={vacancy.company}
+          className="w-full h-40 object-cover"
+        />
+      )}
 
-      {/* Company Section */}
-      <div className="vacancy-detail__section">
-        <h3 className="vacancy-detail__section-title">Company</h3>
-        <div className="vacancy-detail__company">
-          <p className="vacancy-detail__company-name">
-            <a href="#" className="vacancy-detail__link">
-              {vacancy.employer.name}
-            </a>
-          </p>
-          {vacancy.employer.description && (
-            <p className="vacancy-detail__company-description">{vacancy.employer.description}</p>
-          )}
-        </div>
-        <div className="vacancy-detail__contacts">
-          {vacancy.employer.website && (
-            <a href={vacancy.employer.website} target="_blank" rel="noopener noreferrer" className="vacancy-detail__contact-link">
-              🌐 Website
-            </a>
-          )}
-          {vacancy.employer.phone && (
-            <a href={`tel:${vacancy.employer.phone}`} className="vacancy-detail__contact-link">
-              ☎️ {vacancy.employer.phone}
-            </a>
-          )}
-          {vacancy.employer.email && (
-            <a href={`mailto:${vacancy.employer.email}`} className="vacancy-detail__contact-link">
-              ✉️ {vacancy.employer.email}
-            </a>
-          )}
-        </div>
-      </div>
+      <div className="p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{vacancy.title}</h2>
+        <p className="text-lg text-gray-600 mb-4">{vacancy.company}</p>
 
-      <hr className="vacancy-detail__divider" />
-
-      {/* Job Details */}
-      <div className="vacancy-detail__section">
-        <h3 className="vacancy-detail__section-title">Job Details</h3>
-        <div className="vacancy-detail__info-grid">
-          <div className="vacancy-detail__info-item">
-            <span className="vacancy-detail__info-label">Employment Type:</span>
-            <span className="vacancy-detail__info-value">{vacancy.employment_type}</span>
+        <div className="grid grid-cols-2 gap-4 mb-6 pb-6 border-b">
+          <div>
+            <p className="text-sm text-gray-600">Location</p>
+            <p className="font-semibold text-gray-900">{vacancy.city}, {vacancy.country}</p>
           </div>
-          <div className="vacancy-detail__info-item">
-            <span className="vacancy-detail__info-label">Workplace:</span>
-            <span className="vacancy-detail__info-value">{WORKPLACE_TYPES[vacancy.workplace] || vacancy.workplace}</span>
+          <div>
+            <p className="text-sm text-gray-600">Salary</p>
+            <p className="font-semibold text-gray-900">{salary}</p>
           </div>
-          <div className="vacancy-detail__info-item">
-            <span className="vacancy-detail__info-label">Location:</span>
-            <span className="vacancy-detail__info-value">{vacancy.city}, {vacancy.country}</span>
+          <div>
+            <p className="text-sm text-gray-600">Employment Type</p>
+            <p className="font-semibold text-gray-900">{vacancy.employment_type}</p>
           </div>
-          <div className="vacancy-detail__info-item">
-            <span className="vacancy-detail__info-label">Salary:</span>
-            <span className="vacancy-detail__info-value">
-              {formatSalary(vacancy.min_salary, vacancy.max_salary, vacancy.currency)}
-            </span>
+          <div>
+            <p className="text-sm text-gray-600">Workplace</p>
+            <p className="font-semibold text-gray-900">{vacancy.workplace_type}</p>
           </div>
         </div>
-      </div>
 
-      <hr className="vacancy-detail__divider" />
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+          <p className="text-gray-600 whitespace-pre-line">{vacancy.description}</p>
+        </div>
 
-      {/* Description */}
-      <div className="vacancy-detail__section">
-        <h3 className="vacancy-detail__section-title">Description</h3>
-        <div className="vacancy-detail__description">{vacancy.description}</div>
-      </div>
-
-      <hr className="vacancy-detail__divider" />
-
-      {/* Requirements */}
-      <div className="vacancy-detail__section">
-        <h3 className="vacancy-detail__section-title">Requirements</h3>
-        {vacancy.requirements && vacancy.requirements.length > 0 ? (
-          <ul className="vacancy-detail__requirements">
-            {vacancy.requirements.map((req, idx) => (
-              <li key={idx}>{req}</li>
-            ))}
-          </ul>
-        ) : (
-          <p className="vacancy-detail__no-requirements">No requirements specified</p>
+        {vacancy.requirements && vacancy.requirements.length > 0 && (
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Requirements</h3>
+            <ul className="list-disc pl-5 space-y-2">
+              {vacancy.requirements.map((req, idx) => (
+                <li key={idx} className="text-gray-600">
+                  {req}
+                </li>
+              ))}
+            </ul>
+          </div>
         )}
-      </div>
 
-      {/* Apply Button */}
-      <div className="vacancy-detail__actions">
+        {vacancy.company_description && (
+          <div className="mb-6 pb-6 border-b">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">About Company</h3>
+            <p className="text-gray-600 whitespace-pre-line">{vacancy.company_description}</p>
+          </div>
+        )}
+
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Contact</h3>
+          <div className="space-y-2">
+            {vacancy.company_website && (
+              <p>
+                <span className="text-gray-600">Website: </span>
+                <a href={vacancy.company_website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                  {vacancy.company_website}
+                </a>
+              </p>
+            )}
+            {vacancy.company_email && (
+              <p>
+                <span className="text-gray-600">Email: </span>
+                <a href={`mailto:${vacancy.company_email}`} className="text-blue-600 hover:text-blue-800">
+                  {vacancy.company_email}
+                </a>
+              </p>
+            )}
+            {vacancy.company_phone && (
+              <p>
+                <span className="text-gray-600">Phone: </span>
+                <a href={`tel:${vacancy.company_phone}`} className="text-blue-600 hover:text-blue-800">
+                  {vacancy.company_phone}
+                </a>
+              </p>
+            )}
+          </div>
+        </div>
+
         <button
-          className="btn btn-primary btn-lg"
           onClick={onApply}
-          title="This feature will be available in the next version"
+          className="w-full btn btn-primary btn-lg"
         >
           Apply Now
         </button>

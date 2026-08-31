@@ -1,9 +1,8 @@
-import React, { useEffect } from 'react';
-import { VacancyPreview, FilterParams } from '@/types/vacancy';
+import React from 'react';
+import { VacancyPreview } from '@/types/vacancy';
 import { VacancyCard } from './VacancyCard';
 import { Spinner, ErrorFallback } from '@/components/common';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
-import './VacancyList.css';
 
 interface VacancyListProps {
   vacancies: VacancyPreview[];
@@ -38,7 +37,7 @@ export const VacancyList: React.FC<VacancyListProps> = ({
 
   if (isLoading && vacancies.length === 0) {
     return (
-      <div className="vacancy-list">
+      <div className="flex justify-center py-12">
         <Spinner size="md" label="Loading vacancies..." />
       </div>
     );
@@ -46,16 +45,16 @@ export const VacancyList: React.FC<VacancyListProps> = ({
 
   if (error && vacancies.length === 0) {
     return (
-      <div className="vacancy-list">
+      <div className="bg-white rounded-lg p-6">
         <ErrorFallback message={error} onRetry={onRetry} />
       </div>
     );
   }
 
   return (
-    <div className="vacancy-list">
+    <div>
       {vacancies.length === 0 ? (
-        <div className="vacancy-list__empty">
+        <div className="bg-white rounded-lg p-8 text-center text-gray-500">
           <p>No vacancies found. Try adjusting your filters.</p>
         </div>
       ) : (
@@ -70,13 +69,13 @@ export const VacancyList: React.FC<VacancyListProps> = ({
           ))}
 
           {hasMore && (
-            <div ref={infiniteScrollRef} className="vacancy-list__trigger">
+            <div ref={infiniteScrollRef} className="flex justify-center py-8">
               {isLoadingMore && <Spinner size="sm" label="Loading more..." />}
             </div>
           )}
 
           {!hasMore && vacancies.length > 0 && (
-            <div className="vacancy-list__end-message">
+            <div className="text-center py-8 text-gray-500">
               <p>✓ All vacancies loaded</p>
             </div>
           )}

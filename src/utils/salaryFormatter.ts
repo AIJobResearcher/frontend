@@ -1,24 +1,9 @@
 /**
- * Format salary range for display
+ * Format salary range
  */
-export const formatSalary = (
-  minSalary: number | null | undefined,
-  maxSalary: number | null | undefined,
-  currency: string = 'USD'
-): string => {
-  if (!minSalary && !maxSalary) {
-    return 'Salary not specified';
-  }
-
-  const currencySymbol = currency === 'USD' ? '$' : '€';
-
-  if (minSalary && maxSalary) {
-    return `${currencySymbol}${minSalary.toLocaleString()} - ${currencySymbol}${maxSalary.toLocaleString()}/mo`;
-  }
-
-  if (minSalary) {
-    return `from ${currencySymbol}${minSalary.toLocaleString()}/mo`;
-  }
-
-  return `up to ${currencySymbol}${maxSalary!.toLocaleString()}/mo`;
+export const formatSalary = (min?: number, max?: number): string => {
+  if (!min && !max) return 'Not specified';
+  if (min && !max) return `$${min}K+`;
+  if (!min && max) return `Up to $${max}K`;
+  return `$${min}K - $${max}K`;
 };

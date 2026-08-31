@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { VacancyPreview, FilterParams } from '@/types/vacancy';
-import { SORT_OPTIONS, SEARCH_DEBOUNCE_MS } from '@/utils/constants';
-import './VacancyFilters.css';
+import { FilterParams } from '@/types/vacancy';
+import { SORT_OPTIONS } from '@/utils/constants';
 
 interface VacancyFiltersProps {
   onFilterChange: (filters: Partial<FilterParams>) => void;
@@ -30,7 +29,7 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
 
       const timeout = setTimeout(() => {
         onFilterChange({ title: value });
-      }, SEARCH_DEBOUNCE_MS);
+      }, 500);
 
       setSearchTimeout(timeout);
     },
@@ -80,15 +79,15 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
   );
 
   return (
-    <div className="vacancy-filters">
-      <div className="vacancy-filters__group">
-        <label htmlFor="search" className="vacancy-filters__label">
+    <div className="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200">
+      <div className="mb-6">
+        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
           Search
         </label>
         <input
           id="search"
           type="text"
-          className="form-control"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Job title, company..."
           value={searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}
@@ -96,15 +95,15 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
         />
       </div>
 
-      <div className="vacancy-filters__row">
-        <div className="vacancy-filters__group">
-          <label htmlFor="country" className="vacancy-filters__label">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-2">
             Country
           </label>
           <input
             id="country"
             type="text"
-            className="form-control"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g., Ukraine"
             value={currentFilters.country || ''}
             onChange={(e) => handleCountryChange(e.target.value)}
@@ -112,14 +111,14 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
           />
         </div>
 
-        <div className="vacancy-filters__group">
-          <label htmlFor="city" className="vacancy-filters__label">
+        <div>
+          <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
             City
           </label>
           <input
             id="city"
             type="text"
-            className="form-control"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="e.g., Kyiv"
             value={currentFilters.city || ''}
             onChange={(e) => handleCityChange(e.target.value)}
@@ -128,31 +127,31 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
         </div>
       </div>
 
-      <div className="vacancy-filters__row">
-        <div className="vacancy-filters__group">
-          <label htmlFor="salary-min" className="vacancy-filters__label">
-            Salary From
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label htmlFor="salary-min" className="block text-sm font-medium text-gray-700 mb-2">
+            Salary From (USD)
           </label>
           <input
             id="salary-min"
             type="number"
-            className="form-control"
-            placeholder="Min USD"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Min"
             value={currentFilters.salary_min || ''}
             onChange={(e) => handleSalaryMinChange(e.target.value)}
             disabled={isLoading}
           />
         </div>
 
-        <div className="vacancy-filters__group">
-          <label htmlFor="salary-max" className="vacancy-filters__label">
-            Salary To
+        <div>
+          <label htmlFor="salary-max" className="block text-sm font-medium text-gray-700 mb-2">
+            Salary To (USD)
           </label>
           <input
             id="salary-max"
             type="number"
-            className="form-control"
-            placeholder="Max USD"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Max"
             value={currentFilters.salary_max || ''}
             onChange={(e) => handleSalaryMaxChange(e.target.value)}
             disabled={isLoading}
@@ -160,26 +159,27 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
         </div>
       </div>
 
-      <div className="vacancy-filters__row">
-        <div className="vacancy-filters__group vacancy-filters__group--checkbox">
-          <label className="vacancy-filters__checkbox-label">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="flex items-end">
+          <label className="flex items-center cursor-pointer">
             <input
               type="checkbox"
               checked={currentFilters.status === 'open'}
               onChange={(e) => handleStatusChange(e.target.checked)}
               disabled={isLoading}
+              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
             />
-            <span>Open Positions Only</span>
+            <span className="ml-3 text-sm font-medium text-gray-700">Open Positions Only</span>
           </label>
         </div>
 
-        <div className="vacancy-filters__group">
-          <label htmlFor="sort" className="vacancy-filters__label">
+        <div>
+          <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-2">
             Sort By
           </label>
           <select
             id="sort"
-            className="form-control"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             value={currentFilters.sort || 'date'}
             onChange={(e) => handleSortChange(e.target.value)}
             disabled={isLoading}
