@@ -1,0 +1,97 @@
+.vacancy-card {
+  background-color: #ffffff;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  &.active {
+    border-color: #0056b3;
+    background-color: #f0f4f8;
+  }
+}
+
+.vacancy-card__header {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.vacancy-card__logo {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0056b3;
+  color: #ffffff;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.vacancy-card__title-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.vacancy-card__title {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vacancy-card__company {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.vacancy-card__meta {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.vacancy-card__type {
+  display: inline-block;
+  background-color: #e9ecef;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.vacancy-card__location {
+  display: inline-block;
+}
+
+.vacancy-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+.vacancy-card__date {
+  flex: 1;
+}
+
+.vacancy-card__salary {
+  font-weight: 600;
+  color: #0056b3;
+}
