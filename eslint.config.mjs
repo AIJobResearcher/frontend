@@ -7,7 +7,15 @@ import prettierConfig from 'eslint-config-prettier';
 
 export default tseslint.config(
     {
-        ignores: ['dist/**', 'node_modules/**', 'tailwind.config.js'],
+        ignores: ['dist/**', 'node_modules/**'],
+    },
+    {
+        files: ['**/*.{js,mjs,cjs}'],
+        languageOptions: {
+            globals: {
+                ...globals.node,
+            },
+        },
     },
     js.configs.recommended,
     ...tseslint.configs.recommended,
@@ -42,6 +50,7 @@ export default tseslint.config(
             'react-hooks/exhaustive-deps': 'warn',
             '@typescript-eslint/no-explicit-any': 'warn',
             '@typescript-eslint/explicit-function-return-type': 'warn',
+            'max-lines': ['warn', { max: 300, skipBlankLines: true, skipComments: true }],
             'no-console': ['warn', { allow: ['warn', 'error'] }],
         },
     },

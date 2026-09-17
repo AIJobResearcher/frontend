@@ -9,3 +9,5 @@ dist/
 .idea/
 coverage/
 /docs/
+/.ai-agent/user.data/temp/
+/.ai-agent/agent.data/

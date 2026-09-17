@@ -1,7 +1,5 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-declare const API_BASE_URL: string;
-
 class ApiClient {
   private client: AxiosInstance;
 

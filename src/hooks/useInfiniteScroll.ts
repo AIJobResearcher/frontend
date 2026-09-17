@@ -29,7 +29,7 @@ export const useInfiniteScroll = ({
 
     observer.observe(ref.current);
 
-    return () => {
+    return (): void => {
       observer.disconnect();
     };
   }, [onIntersect, enabled, threshold]);
