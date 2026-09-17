@@ -3,7 +3,65 @@ import { useSearchParams, useParams, useNavigate } from 'react-router-dom';
 import { VacancyFilters, VacancyList, VacancyDetail } from '@/components/vacancies';
 import { useVacancies, useVacancyDetail } from '@/hooks';
 import { useVacancyFilterStore } from '@/store/vacancyFilterStore';
-import { FilterParams } from '@/types/vacancy';
+import { FilterParams, VacancySort, VacancyStatus } from '@/types/vacancy';
+import { DEFAULT_FILTERS, SORT_OPTIONS, VACANCY_STATUSES } from '@/utils/constants';
+
+const parseNumberParam = (raw: string | null): number | undefined => {
+  if (raw === null || raw.trim() === '') return undefined;
+  const value = Number(raw);
+  return Number.isFinite(value) ? value : undefined;
+};
+
+const isVacancyStatus = (raw: string | null): raw is VacancyStatus =>
+  raw !== null && VACANCY_STATUSES.includes(raw as VacancyStatus);
+
+const isVacancySort = (raw: string | null): raw is VacancySort =>
+  raw !== null && SORT_OPTIONS.some((option) => option.value === raw);
+
+/**
+ * Reads `POST /vacancies` search criteria from the URL query string.
+ */
+export const parseFiltersFromSearchParams = (
+  searchParams: URLSearchParams
+): Partial<FilterParams> => {
+  const status = searchParams.get('status');
+  const sort = searchParams.get('sort');
+
+  return {
+    job_id: searchParams.get('job_id') || undefined,
+    employer_id: searchParams.get('employer_id') || undefined,
+    country: searchParams.get('country') || undefined,
+    city: searchParams.get('city') || undefined,
+    min_salary: parseNumberParam(searchParams.get('min_salary')),
+    max_salary: parseNumberParam(searchParams.get('max_salary')),
+    status: isVacancyStatus(status) ? status : DEFAULT_FILTERS.status,
+    sort: isVacancySort(sort) ? sort : DEFAULT_FILTERS.sort,
+  };
+};
+
+/**
+ * Serializes search criteria back into the URL query string, skipping empty values.
+ */
+export const buildSearchParamsFromFilters = (filters: Partial<FilterParams>): URLSearchParams => {
+  const params = new URLSearchParams();
+
+  if (filters.job_id) params.set('job_id', filters.job_id);
+  if (filters.employer_id) params.set('employer_id', filters.employer_id);
+  if (filters.country) params.set('country', filters.country);
+  if (filters.city) params.set('city', filters.city);
+  if (filters.min_salary !== undefined) params.set('min_salary', String(filters.min_salary));
+  if (filters.max_salary !== undefined) params.set('max_salary', String(filters.max_salary));
+  if (filters.status) params.set('status', filters.status);
+  if (filters.sort) params.set('sort', filters.sort);
+
+  return params;
+};
+
+/** Drops keys whose value became empty so they are no longer sent to the API */
+const withoutEmptyValues = (filters: Partial<FilterParams>): Partial<FilterParams> =>
+  Object.fromEntries(
+    Object.entries(filters).filter(([, value]) => value !== undefined && value !== '')
+  ) as Partial<FilterParams>;
 
 export const HomePage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -11,19 +69,10 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { setFilters: setStoreFilters } = useVacancyFilterStore();
 
-  const initialFilters: Partial<FilterParams> = {
-    title: searchParams.get('title') || undefined,
-    country: searchParams.get('country') || undefined,
-    city: searchParams.get('city') || undefined,
-    salary_min: searchParams.get('salary_min')
-      ? parseInt(searchParams.get('salary_min')!, 10)
-      : undefined,
-    salary_max: searchParams.get('salary_max')
-      ? parseInt(searchParams.get('salary_max')!, 10)
-      : undefined,
-    status: (searchParams.get('status') as FilterParams['status']) || 'open',
-    sort: (searchParams.get('sort') as FilterParams['sort']) || 'date',
-  };
+  const currentFilters = React.useMemo(
+    () => parseFiltersFromSearchParams(searchParams),
+    [searchParams]
+  );
 
   const {
     vacancies,
@@ -35,7 +84,7 @@ export const HomePage: React.FC = () => {
     setFilters,
     fetchMoreVacancies,
     retry,
-  } = useVacancies(initialFilters);
+  } = useVacancies(currentFilters);
 
   const {
     vacancy,
@@ -46,23 +95,13 @@ export const HomePage: React.FC = () => {
 
   const handleFilterChange = React.useCallback(
     (newFilters: Partial<FilterParams>) => {
-      const params = new URLSearchParams();
+      const nextFilters = withoutEmptyValues({ ...currentFilters, ...newFilters });
 
-      if (newFilters.title) params.set('title', newFilters.title);
-      if (newFilters.country) params.set('country', newFilters.country);
-      if (newFilters.city) params.set('city', newFilters.city);
-      if (newFilters.salary_min !== undefined)
-        params.set('salary_min', String(newFilters.salary_min));
-      if (newFilters.salary_max !== undefined)
-        params.set('salary_max', String(newFilters.salary_max));
-      if (newFilters.status) params.set('status', newFilters.status);
-      if (newFilters.sort) params.set('sort', newFilters.sort);
-
-      setSearchParams(params);
-      setFilters(newFilters);
-      setStoreFilters(newFilters);
+      setSearchParams(buildSearchParamsFromFilters(nextFilters));
+      setFilters(nextFilters);
+      setStoreFilters(nextFilters);
     },
-    [setSearchParams, setFilters, setStoreFilters]
+    [currentFilters, setSearchParams, setFilters, setStoreFilters]
   );
 
   const handleSelectVacancy = React.useCallback(
@@ -81,7 +120,7 @@ export const HomePage: React.FC = () => {
       <div className="container-fluid py-8">
         <VacancyFilters
           onFilterChange={handleFilterChange}
-          currentFilters={initialFilters}
+          currentFilters={currentFilters}
           isLoading={isLoading}
         />
 

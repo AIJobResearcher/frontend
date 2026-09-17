@@ -12,21 +12,21 @@ describe('useVacancyFilterStore', () => {
   it('should update filters', () => {
     const { result } = renderHook(() => useVacancyFilterStore());
     act(() => {
-      result.current.setFilters({ title: 'React Developer' });
+      result.current.setFilters({ job_id: 'job-1' });
     });
-    expect(result.current.filters.title).toBe('React Developer');
+    expect(result.current.filters.job_id).toBe('job-1');
   });
 
   it('should reset filters', () => {
     const { result } = renderHook(() => useVacancyFilterStore());
     act(() => {
-      result.current.setFilters({ title: 'React Developer' });
+      result.current.setFilters({ job_id: 'job-1' });
     });
-    expect(result.current.filters.title).toBe('React Developer');
+    expect(result.current.filters.job_id).toBe('job-1');
 
     act(() => {
       result.current.resetFilters();
     });
-    expect(result.current.filters.title).toBeUndefined();
+    expect(result.current.filters.job_id).toBeUndefined();
   });
 });

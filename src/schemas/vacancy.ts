@@ -5,15 +5,16 @@ import { z } from 'zod';
  */
 
 export const FilterParamsSchema = z.object({
-  title: z.string().optional(),
+  job_id: z.string().optional(),
+  employer_id: z.string().optional(),
   country: z.string().optional(),
   city: z.string().optional(),
-  salary_min: z.number().optional(),
-  salary_max: z.number().optional(),
+  min_salary: z.number().int().optional(),
+  max_salary: z.number().int().optional(),
   status: z.enum(['open', 'closed']).optional(),
   sort: z.enum(['date', 'salary_asc', 'salary_desc']).optional(),
-  page: z.number().optional(),
-  per_page: z.number().optional(),
+  page: z.number().int().positive().optional(),
+  per_page: z.number().int().positive().max(100).optional(),
 });
 
 export const VacancyPreviewSchema = z.object({

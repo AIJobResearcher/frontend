@@ -5,9 +5,13 @@ describe('Vacancy Schemas', () => {
   describe('FilterParamsSchema', () => {
     it('should validate correct filter params', () => {
       const data = {
-        title: 'React Developer',
+        job_id: 'job-1',
+        min_salary: 1000,
+        max_salary: 5000,
         status: 'open',
         sort: 'date',
+        page: 1,
+        per_page: 20,
       };
       const result = FilterParamsSchema.safeParse(data);
       expect(result.success).toBe(true);
@@ -18,6 +22,11 @@ describe('Vacancy Schemas', () => {
         status: 'invalid',
       };
       const result = FilterParamsSchema.safeParse(data);
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject per_page above the API maximum', () => {
+      const result = FilterParamsSchema.safeParse({ per_page: 101 });
       expect(result.success).toBe(false);
     });
   });

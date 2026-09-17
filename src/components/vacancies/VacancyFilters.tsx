@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { FilterParams } from '@/types/vacancy';
-import { SORT_OPTIONS } from '@/utils/constants';
+import { SEARCH_DEBOUNCE_MS, SORT_OPTIONS } from '@/utils/constants';
 
 interface VacancyFiltersProps {
   onFilterChange: (filters: Partial<FilterParams>) => void;
@@ -8,55 +8,74 @@ interface VacancyFiltersProps {
   isLoading?: boolean;
 }
 
+const toOptionalNumber = (value: string): number | undefined => {
+  if (!value.trim()) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+};
+
 export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
   onFilterChange,
   currentFilters,
   isLoading = false,
 }) => {
-  const [searchQuery, setSearchQuery] = useState(currentFilters.title || '');
-  const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [jobId, setJobId] = useState(currentFilters.job_id || '');
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleSearchChange = useCallback(
+  useEffect(() => {
+    setJobId(currentFilters.job_id || '');
+  }, [currentFilters.job_id]);
+
+  useEffect(() => {
+    return (): void => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
+  const handleJobIdChange = useCallback(
     (value: string) => {
-      setSearchQuery(value);
+      setJobId(value);
 
-      if (searchTimeout) {
-        clearTimeout(searchTimeout);
-      }
+      if (debounceRef.current) clearTimeout(debounceRef.current);
 
-      const timeout = setTimeout(() => {
-        onFilterChange({ title: value });
-      }, 500);
-
-      setSearchTimeout(timeout);
+      debounceRef.current = setTimeout(() => {
+        onFilterChange({ job_id: value.trim() || undefined });
+      }, SEARCH_DEBOUNCE_MS);
     },
-    [searchTimeout, onFilterChange]
+    [onFilterChange]
+  );
+
+  const handleEmployerChange = useCallback(
+    (value: string) => {
+      onFilterChange({ employer_id: value.trim() || undefined });
+    },
+    [onFilterChange]
   );
 
   const handleCountryChange = useCallback(
     (value: string) => {
-      onFilterChange({ country: value });
+      onFilterChange({ country: value.trim() || undefined });
     },
     [onFilterChange]
   );
 
   const handleCityChange = useCallback(
     (value: string) => {
-      onFilterChange({ city: value });
+      onFilterChange({ city: value.trim() || undefined });
     },
     [onFilterChange]
   );
 
-  const handleSalaryMinChange = useCallback(
+  const handleMinSalaryChange = useCallback(
     (value: string) => {
-      onFilterChange({ salary_min: value ? parseInt(value, 10) : undefined });
+      onFilterChange({ min_salary: toOptionalNumber(value) });
     },
     [onFilterChange]
   );
 
-  const handleSalaryMaxChange = useCallback(
+  const handleMaxSalaryChange = useCallback(
     (value: string) => {
-      onFilterChange({ salary_max: value ? parseInt(value, 10) : undefined });
+      onFilterChange({ max_salary: toOptionalNumber(value) });
     },
     [onFilterChange]
   );
@@ -77,19 +96,36 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
 
   return (
     <div className="bg-white rounded-lg p-6 mb-6 shadow-sm border border-gray-200">
-      <div className="mb-6">
-        <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-2">
-          Search
-        </label>
-        <input
-          id="search"
-          type="text"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="Job title, company..."
-          value={searchQuery}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          disabled={isLoading}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+          <label htmlFor="job-id" className="block text-sm font-medium text-gray-700 mb-2">
+            Job ID
+          </label>
+          <input
+            id="job-id"
+            type="text"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="e.g., job-123"
+            value={jobId}
+            onChange={(e) => handleJobIdChange(e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="employer-id" className="block text-sm font-medium text-gray-700 mb-2">
+            Employer ID
+          </label>
+          <input
+            id="employer-id"
+            type="text"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="e.g., emp-42"
+            value={currentFilters.employer_id || ''}
+            onChange={(e) => handleEmployerChange(e.target.value)}
+            disabled={isLoading}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -126,31 +162,31 @@ export const VacancyFilters: React.FC<VacancyFiltersProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div>
-          <label htmlFor="salary-min" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="min-salary" className="block text-sm font-medium text-gray-700 mb-2">
             Salary From (USD)
           </label>
           <input
-            id="salary-min"
+            id="min-salary"
             type="number"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Min"
-            value={currentFilters.salary_min || ''}
-            onChange={(e) => handleSalaryMinChange(e.target.value)}
+            value={currentFilters.min_salary ?? ''}
+            onChange={(e) => handleMinSalaryChange(e.target.value)}
             disabled={isLoading}
           />
         </div>
 
         <div>
-          <label htmlFor="salary-max" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="max-salary" className="block text-sm font-medium text-gray-700 mb-2">
             Salary To (USD)
           </label>
           <input
-            id="salary-max"
+            id="max-salary"
             type="number"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             placeholder="Max"
-            value={currentFilters.salary_max || ''}
-            onChange={(e) => handleSalaryMaxChange(e.target.value)}
+            value={currentFilters.max_salary ?? ''}
+            onChange={(e) => handleMaxSalaryChange(e.target.value)}
             disabled={isLoading}
           />
         </div>

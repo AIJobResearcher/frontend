@@ -1,6 +1,8 @@
 import React from 'react';
 import { useMutation, useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { FilterParams, VacancyPreview, Vacancy } from '@/types/vacancy';
+import { getVacancies } from '@/api/vacancies';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '@/utils/constants';
 import { apiClient } from '@/api/client';
 
 interface UseVacanciesReturn {
@@ -18,37 +20,27 @@ interface UseVacanciesReturn {
 export const useVacancies = (filters?: Partial<FilterParams>): UseVacanciesReturn => {
   const [currentFilters, setCurrentFilters] = React.useState<Partial<FilterParams>>(filters || {});
 
-  const { data, isLoading, isFetching, error, hasNextPage, fetchNextPage } = useInfiniteQuery({
-    queryKey: ['vacancies', currentFilters],
-    queryFn: async ({ pageParam = 1 }) => {
-      const response = await apiClient.get<{
-        data: VacancyPreview[];
-        total: number;
-        page: number;
-        per_page: number;
-      }>('/vacancies', {
-        params: {
+  const { data, isLoading, isFetching, error, hasNextPage, fetchNextPage, refetch } =
+    useInfiniteQuery({
+      queryKey: ['vacancies', currentFilters],
+      queryFn: ({ pageParam }) =>
+        getVacancies({
           ...currentFilters,
           page: pageParam,
-          per_page: 20,
-        },
-      });
-      return response.data;
-    },
-    getNextPageParam: (lastPage) => {
-      const { page, per_page, total } = lastPage;
-      const nextPage = page + 1;
-      const totalPages = Math.ceil(total / per_page);
-      return nextPage <= totalPages ? nextPage : undefined;
-    },
-    initialPageParam: 1,
-  });
+          per_page: currentFilters.per_page ?? DEFAULT_PER_PAGE,
+        }),
+      getNextPageParam: (lastPage) => {
+        const { current_page, last_page } = lastPage.meta;
+        return current_page < last_page ? current_page + 1 : undefined;
+      },
+      initialPageParam: DEFAULT_PAGE,
+    });
 
   const vacancies = React.useMemo(() => {
     return data?.pages.flatMap((page) => page.data) || [];
   }, [data]);
 
-  const totalVacancies = data?.pages[0]?.total || 0;
+  const totalVacancies = data?.pages[0]?.meta.total || 0;
 
   return {
     vacancies,
@@ -58,8 +50,12 @@ export const useVacancies = (filters?: Partial<FilterParams>): UseVacanciesRetur
     hasMore: !!hasNextPage,
     totalVacancies,
     setFilters: setCurrentFilters,
-    fetchMoreVacancies: () => fetchNextPage(),
-    retry: () => fetchNextPage(),
+    fetchMoreVacancies: (): void => {
+      void fetchNextPage();
+    },
+    retry: (): void => {
+      void refetch();
+    },
   };
 };
 

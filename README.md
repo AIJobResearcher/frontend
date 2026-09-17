@@ -114,9 +114,13 @@ npm run prepare
 
 ### Environment Setup
 
+Variables are read at build time by `webpack.config.ts` in Vite-compatible order:
+`.env` < `.env.local` < `.env.<mode>` < `.env.<mode>.local`, where `<mode>` is
+`development` or `production` (from `--mode`). Real environment variables always win.
+
 ```bash
 # Copy environment template
-cp .env.development .env.local
+cp .env.example .env.local
 
 # Update API URL if needed
 # VITE_API_URL=http://localhost:8001/api/v1
@@ -203,10 +207,12 @@ http://localhost:8001/api/v1
 
 ### Endpoints
 
-**GET /vacancies**
-- List vacancies with filtering and pagination
-- Query params: `title`, `country`, `city`, `salary_min`, `salary_max`, `status`, `sort`, `page`, `per_page`
-- Response: `{ data: VacancyPreview[], total: number, page: number, per_page: number }`
+**POST /vacancies**
+- Search vacancies with filtering and pagination
+- Body: `multipart/form-data` — `job_id`, `employer_id`, `country`, `city`, `min_salary`, `max_salary`, `status` (`open` | `closed`), `sort` (`date` | `salary_asc` | `salary_desc`), `page` (default `1`), `per_page` (default `20`, max `100`)
+- Response: `{ data: VacancyPreview[], meta: { current_page, per_page, total, last_page }, links: { first, last, prev, next } }`
+- Total count is also exposed via the `X-Total-Count` response header
+- `422` on validation failure
 
 **GET /vacancies/:id**
 - Get detailed vacancy information

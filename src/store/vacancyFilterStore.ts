@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { FilterParams } from '@/types/vacancy';
+import { DEFAULT_FILTERS } from '@/utils/constants';
 
 interface VacancyFilterStore {
   filters: Partial<FilterParams>;
@@ -7,10 +8,7 @@ interface VacancyFilterStore {
   resetFilters: () => void;
 }
 
-const defaultFilters: Partial<FilterParams> = {
-  status: 'open',
-  sort: 'date',
-};
+const defaultFilters: Partial<FilterParams> = DEFAULT_FILTERS;
 
 export const useVacancyFilterStore = create<VacancyFilterStore>((set) => ({
   filters: defaultFilters,

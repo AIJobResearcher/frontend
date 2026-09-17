@@ -52,35 +52,57 @@ export interface Vacancy {
 
 export type VacancyDetail = Vacancy;
 
+export type VacancyStatus = 'open' | 'closed';
+export type VacancySort = 'date' | 'salary_asc' | 'salary_desc';
+
+export interface PaginationMeta {
+  current_page: number;
+  per_page: number;
+  total: number;
+  last_page: number;
+}
+
+export interface PaginationLinks {
+  first: string;
+  last: string;
+  prev: string | null;
+  next: string | null;
+}
+
 export interface VacanciesListResponse {
   data: VacancyPreview[];
-  meta: {
-    current_page: number;
-    per_page: number;
-    total: number;
-    last_page: number;
-  };
-  links: {
-    first: string;
-    last: string;
-    prev: string | null;
-    next: string | null;
-  };
+  meta: PaginationMeta;
+  /** Pagination links as returned by the API (omitted by some responses) */
+  links?: PaginationLinks;
 }
 
 export interface VacancyDetailResponse {
   data: Vacancy;
 }
 
+/**
+ * Search criteria for `POST /vacancies`.
+ * Sent as `multipart/form-data`; every field is optional and nullable.
+ */
 export interface FilterParams {
-  title?: string;
+  /** Id of the job the vacancy is assigned to */
+  job_id?: string;
+  /** Filter by employer */
   employer_id?: string;
+  /** Filter by country */
   country?: string;
+  /** Filter by city */
   city?: string;
-  salary_min?: number;
-  salary_max?: number;
-  status?: 'open' | 'closed';
-  sort?: 'date' | 'salary_asc' | 'salary_desc';
-  page: number;
-  per_page: number;
+  /** Minimum salary (USD) */
+  min_salary?: number;
+  /** Maximum salary (USD) */
+  max_salary?: number;
+  /** Vacancy status */
+  status?: VacancyStatus;
+  /** Number of records per page (max 100, default 20) */
+  per_page?: number;
+  /** Page number (default 1) */
+  page?: number;
+  /** Sort field (default `date`) */
+  sort?: VacancySort;
 }
