@@ -1,19 +1,47 @@
-/** A desired job joined with the Vacancies Market `Job.title` for the bar. */
+import { createServiceClient } from '@/shared/api/clients';
+import { unwrap } from '@/shared/api/request';
+import { RESEARCHER_CRM_API_URL } from '@/shared/config/env';
+
+/** A desired job resolved to the catalogue title shown in the bar (ui 3.1). */
 export interface DesiredJobView {
-  id: string;
   jobId: string;
   title: string;
 }
 
-/**
- * ResearcherCrm exposes `POST /jobs` but no list operation yet, so the bar is
- * fed from this placeholder until the contract is published (migration plan
- * 1.11). Replace the body with a `GET` call once the operation exists.
- */
-const DESIRED_JOBS_PLACEHOLDER: DesiredJobView[] = [
-  { id: 'placeholder-frontend', jobId: 'placeholder-frontend', title: 'Frontend Developer' },
-  { id: 'placeholder-react', jobId: 'placeholder-react', title: 'React Engineer' },
-];
+/** What `GET /jobs` returns per entry: `Job.id` and `Job.title`. */
+interface DesiredJobDto {
+  id: string;
+  title: string;
+}
 
-/** Desired jobs of the current Researcher (placeholder, see above). */
-export const getDesiredJobs = async (): Promise<DesiredJobView[]> => DESIRED_JOBS_PLACEHOLDER;
+/**
+ * `GET /jobs` of ResearcherCrm is not published in
+ * `docs/api/researcher-crm/openapi.yaml` yet. This local path type mirrors the
+ * agreed response (`Job.id` + `Job.title`) and must be dropped in favour of the
+ * generated type as soon as the operation is documented.
+ */
+interface DesiredJobsPaths {
+  '/jobs': {
+    parameters: { query?: never; header?: never; path?: never; cookie?: never };
+    get: {
+      parameters: { query?: never; header?: never; path?: never; cookie?: never };
+      requestBody?: never;
+      responses: {
+        200: {
+          headers: { [name: string]: unknown };
+          content: { 'application/json': DesiredJobDto[] };
+        };
+      };
+    };
+  };
+}
+
+const researcherCrmClient = createServiceClient<DesiredJobsPaths>(RESEARCHER_CRM_API_URL);
+
+/** Desired jobs of the current Researcher, in bar order. */
+export const getDesiredJobs = async (): Promise<DesiredJobView[]> => {
+  const result = await researcherCrmClient.GET('/jobs');
+  const jobs = unwrap(result);
+
+  return jobs.map((job) => ({ jobId: job.id, title: job.title }));
+};

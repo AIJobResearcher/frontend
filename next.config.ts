@@ -6,8 +6,14 @@ const withNextIntl = createNextIntlPlugin('./src/shared/i18n/request.ts');
 /** Must match the fallback in `src/shared/config/env.ts`. */
 const DEFAULT_API_URL = 'http://localhost:8001/api/v1';
 
-const apiOrigin = new URL(process.env.NEXT_PUBLIC_VACANCIES_MARKET_API_URL ?? DEFAULT_API_URL)
-  .origin;
+const apiOrigins = [
+  ...new Set(
+    [
+      process.env.NEXT_PUBLIC_VACANCIES_MARKET_API_URL || DEFAULT_API_URL,
+      process.env.NEXT_PUBLIC_RESEARCHER_CRM_API_URL || DEFAULT_API_URL,
+    ].map((url) => new URL(url).origin)
+  ),
+].join(' ');
 
 const contentSecurityPolicy = [
   "default-src 'self'",
@@ -19,7 +25,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin}`,
+  `connect-src 'self' ${apiOrigins}`,
 ].join('; ');
 
 const nextConfig: NextConfig = {

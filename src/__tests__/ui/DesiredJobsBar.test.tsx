@@ -3,8 +3,8 @@ import { DesiredJobsBar } from '@/entities/desired-job/ui/DesiredJobsBar';
 import { renderWithProviders } from '@/shared/test-utils/renderWithProviders';
 
 const jobs = [
-  { id: 'j1', jobId: 'job-1', title: 'Frontend Developer' },
-  { id: 'j2', jobId: 'job-2', title: 'React Engineer' },
+  { jobId: 'job-1', title: 'Frontend Developer' },
+  { jobId: 'job-2', title: 'React Engineer' },
 ];
 
 describe('DesiredJobsBar', () => {

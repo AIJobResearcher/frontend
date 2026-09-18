@@ -32,7 +32,7 @@ export const DesiredJobsBar = ({
           const isActive = job.jobId === activeJobId;
 
           return (
-            <li key={job.id}>
+            <li key={job.jobId}>
               <Chip
                 isActive={isActive}
                 aria-current={isActive ? 'true' : undefined}
