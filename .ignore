@@ -1,6 +1,6 @@
 node_modules/
-dist/
+.next/
 coverage/
 package-lock.json
-.cache/
+_cache/
 *.log

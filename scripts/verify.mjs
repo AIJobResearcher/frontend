@@ -41,16 +41,12 @@ const step = (label, command, args) => {
 const summary = [['types', step('tsc --noEmit', bin('tsc'), ['--noEmit'])]];
 
 if (changed.length > 0) {
-  summary.push([
-    `lint (${changed.length} changed)`,
-    step('eslint --format unix', bin('eslint'), ['--format', 'unix', ...changed]),
-  ]);
+  summary.push(['lint (changed)', step('oxlint', bin('oxlint'), changed)]);
   summary.push([
     'tests (related)',
-    step('vitest related --reporter=dot', bin('vitest'), [
-      'related',
+    step('jest --findRelatedTests', bin('jest'), [
+      '--findRelatedTests',
       ...changed,
-      '--reporter=dot',
       '--passWithNoTests',
     ]),
   ]);

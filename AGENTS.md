@@ -2,19 +2,23 @@
 
 ## 1. Project
 
-User interface of AIJobResearcher: a single-page React + TypeScript
-application built with Webpack 5 and Babel.
+User interface of AIJobResearcher: a Next.js 16.3 App Router application
+(React 19.2, TypeScript 7.0.2).
 
-1. `src/` — application code: `api/`, `components/`, `hooks/`, `pages/`,
-   `schemas/`, `store/`, `types/`, `utils/`, `__tests__/`; entry point
-   `src/main.tsx`.
-2. `docs/` — untracked copy of the platform documentation (ADR, domain, C4,
+1. `app/` — App Router routes, root layout, providers, error boundaries and
+   route-only components under `app/_components/`.
+2. `src/` — feature-sliced layers, downward imports only: `shared/` (`api/`
+   with generated OpenAPI types under `api/generated/`, `config/`, `i18n/`,
+   `lib/`, `ui/`, `test-utils/`), `entities/` (`vacancy/`, `desired-job/`),
+   `features/` (`vacancies-market/`); `src/__tests__/` mirrors the layers.
+   `src/pages/` must not exist, because Next.js treats it as the Pages Router.
+3. `docs/` — untracked copy of the platform documentation (ADR, domain, C4,
    OpenAPI, AsyncAPI); reference only, not part of this repository's history.
-3. `.ai-agent/` — agent standards and untracked scratch space (`user.data/`,
+4. `.ai-agent/` — agent standards and untracked scratch space (`user.data/`,
    `agent.data/`).
-4. Configs — `package.json`, `webpack.config.ts`, `vitest.config.ts`,
-   `eslint.config.mjs`, `tsconfig.json`, `.husky/`.
-5. Integration — REST consumer of Vacancies Market and ResearcherCrm; domain
+5. Configs — `package.json`, `next.config.ts`, `jest.config.mjs`,
+   `.oxlintrc.json`, `tsconfig.json`, `.husky/`; caches live in `_cache/`.
+6. Integration — REST consumer of Vacancies Market and ResearcherCrm; domain
    events do not involve this service.
 
 ## 2. Quality
@@ -27,9 +31,9 @@ application built with Webpack 5 and Babel.
 2. `docs/api/*/openapi.yaml` is the source of truth for request and response
    shapes; when code and spec disagree, report the mismatch instead of
    hardcoding either of them.
-3. Keep layers apart: server state and transport in `src/api/` and
-   `src/hooks/`, UI state in `src/store/`, runtime validation in
-   `src/schemas/`; components stay free of business logic.
+3. Keep layers apart (standard 8.5): `app/` → `features/` → `entities/` →
+   `shared/` with downward imports only; server state in TanStack Query,
+   no global store (ADR-019); components stay free of business logic.
 4. Change only what the task requires: patch the affected section, no
    speculative rewrites or extra artifacts.
 5. Prefer the scoped check `npm run verify` (types + lint + related tests on
@@ -37,8 +41,8 @@ application built with Webpack 5 and Babel.
 
 ## 3. Token Efficiency
 
-1. Never read `package-lock.json`, `node_modules/`, `dist/`, `coverage/`;
-   take scripts and versions from `package.json`.
+1. Never read `package-lock.json`, `node_modules/`, `.next/`, `_cache/`,
+   `dist/`, `coverage/`; take scripts and versions from `package.json`.
 2. Grep first, then read matching ranges only and cite `path#L..L`; inside
    `docs/` and `docs/api/*/openapi.yaml` read the one section or operation,
    never the whole file; cap shell output with `head`/`tail`/`grep`.
@@ -66,8 +70,8 @@ application built with Webpack 5 and Babel.
 2. Git (stage/commit/push) is handled by the user.
 3. Ask first before adding dependencies, changing the project configs (see
    1.4), restructuring, or deleting/overwriting files.
-4. Never run analyzers, tests, or installs on your own (ESLint, Prettier,
-   `tsc`, Vitest, npm install); run them only on an explicit "run" / "fix and
+4. Never run analyzers, tests, or installs on your own (oxlint, Prettier,
+   `tsc`, Jest, npm install); run them only on an explicit "run" / "fix and
    verify" request, scoped to the changed files, then re-report briefly. A
    pasted error list means: fix exactly that and stop — no tool runs, no
    extra checks.

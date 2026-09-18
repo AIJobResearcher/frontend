@@ -1,125 +1,100 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+/**
+ * @jest-environment node
+ */
+import { getVacancyById, searchVacancies } from '@/entities/vacancy/api/vacancies';
+import { ApiError } from '@/shared/api/errors';
 
-const { post, get } = vi.hoisted(() => ({ post: vi.fn(), get: vi.fn() }));
-
-vi.mock('@/api/client', () => ({
-  apiClient: { post, get },
-}));
-
-import { getVacancies, getVacancyById, buildVacancySearchFormData } from '@/api/vacancies';
-
-type PostCall = [string, FormData, { headers: Record<string, string> }];
-
-describe('buildVacancySearchFormData', () => {
-  it('should include only the provided criteria with API defaults for paging', () => {
-    const formData = buildVacancySearchFormData({ job_id: 'job-1', status: 'open' });
-
-    expect(formData.get('job_id')).toBe('job-1');
-    expect(formData.get('status')).toBe('open');
-    expect(formData.get('page')).toBe('1');
-    expect(formData.get('per_page')).toBe('20');
-    expect(formData.has('country')).toBe(false);
-    expect(formData.has('min_salary')).toBe(false);
+const jsonResponse = (body: unknown, status = 200): Response =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
   });
 
-  it('should skip empty strings and undefined values', () => {
-    const formData = buildVacancySearchFormData({
-      job_id: '   ',
-      city: undefined,
-      employer_id: 'emp-1',
-    });
+const isRequest = (value: unknown): value is Request => value instanceof Request;
 
-    expect(formData.has('job_id')).toBe(false);
-    expect(formData.has('city')).toBe(false);
-    expect(formData.get('employer_id')).toBe('emp-1');
-  });
+const readRequest = (input: unknown): Request => {
+  if (!isRequest(input)) throw new Error('fetch was not called with a Request');
 
-  it('should serialize salary bounds and sorting', () => {
-    const formData = buildVacancySearchFormData({
+  return input;
+};
+
+const pageBody = {
+  data: [{ id: 'v1', title: 'Vacancy v1' }],
+  meta: { current_page: 2, per_page: 20, total: 21, last_page: 2 },
+};
+
+describe('searchVacancies', () => {
+  it('posts JSON criteria and normalises the page', async () => {
+    const fetchMock = jest.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(pageBody));
+
+    const page = await searchVacancies({
+      job_id: 'job-1',
       min_salary: 1000,
-      max_salary: 5000,
-      sort: 'salary_desc',
-      page: 3,
-      per_page: 50,
+      workplace: 'remote',
+      posted_from: '2026-09-01T00:00:00.000Z',
     });
 
-    expect(formData.get('min_salary')).toBe('1000');
-    expect(formData.get('max_salary')).toBe('5000');
-    expect(formData.get('sort')).toBe('salary_desc');
-    expect(formData.get('page')).toBe('3');
-    expect(formData.get('per_page')).toBe('50');
-  });
-});
-
-describe('getVacancies', () => {
-  beforeEach(() => {
-    post.mockReset();
-    get.mockReset();
-  });
-
-  it('should POST multipart/form-data to /vacancies', async () => {
-    post.mockResolvedValue({
-      data: {
-        data: [{ id: '1', title: 'Developer' }],
-        meta: { current_page: 1, per_page: 20, total: 1, last_page: 1 },
-        links: { first: 'a', last: 'a', prev: null, next: null },
-      },
-      headers: {},
+    const request = readRequest(fetchMock.mock.calls[0][0]);
+    expect(request.method).toBe('POST');
+    expect(request.url).toContain('/vacancies');
+    expect(request.headers.get('Content-Type')).toContain('application/json');
+    await expect(request.json()).resolves.toMatchObject({
+      job_id: 'job-1',
+      min_salary: 1000,
+      workplace: 'remote',
+      posted_from: '2026-09-01T00:00:00.000Z',
     });
 
-    const response = await getVacancies({ country: 'Ukraine' });
-    const [url, body, config] = post.mock.calls[0] as PostCall;
-
-    expect(post).toHaveBeenCalledTimes(1);
-    expect(url).toBe('/vacancies');
-    expect(body).toBeInstanceOf(FormData);
-    expect(body.get('country')).toBe('Ukraine');
-    expect(config.headers['Content-Type']).toBe('multipart/form-data');
-    expect(response.data).toHaveLength(1);
-    expect(response.meta.total).toBe(1);
+    expect(page.meta).toEqual({ current_page: 2, per_page: 20, total: 21, last_page: 2 });
+    expect(page.data).toHaveLength(1);
   });
 
-  it('should prefer the X-Total-Count header for the total', async () => {
-    post.mockResolvedValue({
-      data: {
-        data: [],
-        meta: { current_page: 2, per_page: 10, total: 0, last_page: 1 },
-      },
-      headers: { 'x-total-count': '42' },
+  it('stamps every request with a Correlation-ID', async () => {
+    const fetchMock = jest.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse(pageBody));
+
+    await searchVacancies({ job_id: 'job-1' });
+
+    const request = readRequest(fetchMock.mock.calls[0][0]);
+    expect(request.headers.get('Correlation-ID')).toBeTruthy();
+  });
+
+  it('throws a typed error on failure', async () => {
+    // A fresh Response per call: a body can only be read once.
+    jest
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(() => Promise.resolve(jsonResponse({}, 429)));
+
+    await expect(searchVacancies({ job_id: 'job-1' })).rejects.toBeInstanceOf(ApiError);
+    await expect(searchVacancies({ job_id: 'job-1' })).rejects.toMatchObject({
+      kind: 'rate_limited',
     });
-
-    const response = await getVacancies({ page: 2, per_page: 10 });
-
-    expect(response.meta.total).toBe(42);
-    expect(response.meta.current_page).toBe(2);
   });
 
-  it('should fall back to computed pagination when meta and header are missing', async () => {
-    post.mockResolvedValue({ data: { data: [] }, headers: {} });
+  it('maps 401 to unauthorized', async () => {
+    jest.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({}, 401));
 
-    const response = await getVacancies({ page: 4, per_page: 10 });
-
-    expect(response.data).toEqual([]);
-    expect(response.meta).toEqual({
-      current_page: 4,
-      per_page: 10,
-      total: 0,
-      last_page: 1,
+    await expect(searchVacancies({ job_id: 'job-1' })).rejects.toMatchObject({
+      kind: 'unauthorized',
     });
   });
 });
 
 describe('getVacancyById', () => {
-  beforeEach(() => {
-    get.mockReset();
+  it('returns the vacancy from the data envelope', async () => {
+    const fetchMock = jest
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(jsonResponse({ data: { id: 'v1', title: 'Vacancy v1' } }));
+
+    await expect(getVacancyById('v1')).resolves.toEqual({ id: 'v1', title: 'Vacancy v1' });
+
+    const request = readRequest(fetchMock.mock.calls[0][0]);
+    expect(request.method).toBe('GET');
+    expect(request.url).toContain('/vacancy/v1');
   });
 
-  it('should fetch a single vacancy by id', async () => {
-    get.mockResolvedValue({ data: { data: { id: '1', title: 'Developer' } } });
+  it('maps 404 to not_found', async () => {
+    jest.spyOn(globalThis, 'fetch').mockResolvedValue(jsonResponse({}, 404));
 
-    const vacancy = await getVacancyById('1');
-
-    expect(get).toHaveBeenCalledWith('/vacancies/1');
-    expect(vacancy.title).toBe('Developer');
+    await expect(getVacancyById('missing')).rejects.toMatchObject({ kind: 'not_found' });
   });
 });

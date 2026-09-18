@@ -1,0 +1,70 @@
+{
+  "Metadata": {
+    "title": "AIJobResearcher",
+    "description": "Search vacancies and inspect them with AI-assisted job search."
+  },
+  "Header": {
+    "home": "AIJobResearcher home",
+    "navLabel": "Main",
+    "vacanciesMarket": "Vacancies Market"
+  },
+  "Errors": {
+    "retry": "Try again",
+    "fallbackTitle": "Something went wrong",
+    "pageTitle": "Something went wrong",
+    "notFoundTitle": "Page not found",
+    "backToVacancies": "Back to vacancies"
+  },
+  "DesiredJobs": {
+    "barLabel": "Desired jobs",
+    "addJob": "Add job",
+    "loading": "Loading desired jobs...",
+    "errorTitle": "Could not load desired jobs"
+  },
+  "Vacancies": {
+    "listLabel": "Vacancies",
+    "breadcrumbsLabel": "Breadcrumbs",
+    "title": "Vacancies ({count})",
+    "basedOnJob": "Based on your desired job: {title}",
+    "loading": "Loading vacancies...",
+    "loadingMore": "Loading more...",
+    "empty": "No vacancies found.",
+    "errorTitle": "Could not load vacancies",
+    "backToList": "Back to list",
+    "postedAt": "Posted {date}",
+    "filters": {
+      "legend": "Filters",
+      "hint": "Select a tag on a vacancy to filter the list.",
+      "clearAll": "Clear all",
+      "clearFilters": "Clear filters",
+      "postedFrom": "Posted from",
+      "postedTo": "Posted to",
+      "remove": "Remove filter {label}"
+    },
+    "detail": {
+      "empty": "Select a vacancy to view details.",
+      "loading": "Loading vacancy details...",
+      "errorTitle": "Could not load the vacancy",
+      "notFoundTitle": "Vacancy unavailable",
+      "refreshList": "Refresh list",
+      "description": "About the job",
+      "requirements": "Requirements",
+      "employer": "About the company",
+      "interviewer": "Meet the hiring team",
+      "location": "Location",
+      "salary": "Salary",
+      "employmentType": "Employment type",
+      "workplace": "Workplace",
+      "posted": "Posted",
+      "website": "Website",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "salary": {
+      "notSpecified": "Salary not specified",
+      "range": "{min} - {max}",
+      "from": "From {min}",
+      "upTo": "Up to {max}"
+    }
+  }
+}
