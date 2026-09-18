@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens of the LinkedIn-inspired visual language (ADR-020, ui 2.7).
+ * Every colour, radius and shadow used by the UI comes from here, so a theme
+ * change never requires touching a component.
+ */
+@theme {
+  --font-sans: -apple-system, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-brand: #0a66c2;
+  --color-brand-hover: #004182;
+  --color-brand-soft: #eaf3fc;
+  --color-canvas: #f4f2ee;
+  --color-canvas-hover: #f3f2ef;
+  --color-surface: #ffffff;
+  --color-ink: rgba(0, 0, 0, 0.9);
+  --color-ink-muted: rgba(0, 0, 0, 0.6);
+  --color-ink-faint: rgba(0, 0, 0, 0.45);
+  --color-line: rgba(0, 0, 0, 0.08);
+  --color-line-strong: rgba(0, 0, 0, 0.15);
+  --color-success: #01754f;
+
+  --radius-card: 0.5rem;
+  --radius-field: 0.25rem;
+  --shadow-panel: 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-brand);
+  }
+
+  a:hover {
+    color: var(--color-brand-hover);
+    text-decoration: underline;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* Visible focus for every interactive element (ui 2.7, WCAG 2.1 AA). */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+/* Page container: LinkedIn content width (1128px) with a two-pane layout. */
+@utility shell {
+  width: 100%;
+  max-width: 1128px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
